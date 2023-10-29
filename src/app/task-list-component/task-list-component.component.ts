@@ -21,7 +21,6 @@ export class TaskListComponentComponent {
     { title: 'Task 3', isComplete: false }
   ];
 
-
   showConfirmationModal = false;
 
   taskToDelete: Task | null = null;
