@@ -1,25 +1,59 @@
-<div class="task-list">
-    <h2>Your Today's Task List</h2>
-    <ul>
-        <li *ngFor="let task of tasks" class="task-item">
-            <span class="task-title">{{ task.title }}</span>
-            <button (click)="editTask(task)" class="task-button edit-button">Edit</button>
-            <button (click)="confirmDeleteTask(task)" class="task-button delete-button">Delete</button>
-            <label class="task-label">
-                <input type="checkbox" [(ngModel)]="task.isComplete" (click)="toggleCompletion(task)"
-                    class="task-checkbox">
-                <span class="task-status">{{ task.isComplete ? 'Completed' : 'Pending' }}</span>
-            </label>
-        </li>
-    </ul>
-    <button (click)="addNewTask()" class="add-button">Add New Task</button>
+<div class="container">
+    <h2 class="text-center mt-4">Your Daily Task Manager</h2>
+    <p class="text-center">{{ date | date:'dd-MM-yyyy' }} {{ date | date:'EEEE' }}</p>
+    <div class="row">
+        <div class="col-md-4" *ngFor="let task of tasks">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h4 class="card-title">{{ task.title }}</h4>
+                    <div class="input-group">
+                        <input type="text" class="form-control" aria-label="Username" aria-describedby="addon-wrapping" [(ngModel)]="task.title" />
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-primary" (click)="editTask(task)">Edit</button>
+                            <button class="btn btn-outline-danger" (click)="confirmDeleteTask(task)">Delete</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateInput1">Start Date:</label>
+                        <input type="date" class="form-control" id="dateInput1" />
+                    </div>
+                    <div class="form-group">
+                        <label for="dateInput2">End Date:</label>
+                        <input type="date" class="form-control" id="dateInput2" />
+                    </div>
+                    <div class="form-group">
+                        <label for="dateInput2">Time Spend: (hr)</label>
+                        <input type="number" class="form-control" id="timeSpend" />
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="checkboxInput" [(ngModel)]="task.isComplete" (click)="toggleCompletion(task)" />
+                        <label class="form-check-label" for="checkboxInput">{{ task.isComplete ? 'Completed' : 'Pending' }}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <button (click)="addNewTask()" class="btn btn-primary add-button">Add New Task</button>
+        </div>
+    </div>
+</div>
 
-    <div class="confirmation-modal" *ngIf="showConfirmationModal">
+<div class="confirmation-modal" *ngIf="showConfirmationModal">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <h2>Confirmation</h2>
-            <p>Are you sure you want to delete this task?</p>
-            <button (click)="cancelDeleteTask()" class="cancel-button">Cancel</button>
-            <button (click)="deleteTask()" class="confirm-button">Delete</button>
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" (click)="cancelDeleteTask()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this task?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal" (click)="cancelDeleteTask()">Cancel</button>
+                <button type="button" class="btn btn-danger confirm-button" (click)="deleteTask()">Delete</button>
+            </div>
         </div>
     </div>
 </div>
