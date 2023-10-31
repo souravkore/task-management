@@ -25,7 +25,7 @@ export class TaskListComponentComponent {
 
   taskToDelete: Task | null = null;
 
-  date:Date = new Date();
+  date:Date = new Date(); 
 
   editTask(task: Task) {
     // Prompt the user for a new task name
