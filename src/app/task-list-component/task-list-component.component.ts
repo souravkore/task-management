@@ -138,6 +138,6 @@ export class TaskListComponentComponent {
     localStorage.clear();
     this.tasks = []; // Clear the tasks array
     this.showDeleteAllModal = false;
-    console.log('All Tasks Deleted...');
+    console.log('All Tasks Deleted...'); 
   }
 }
