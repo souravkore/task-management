@@ -140,4 +140,5 @@ export class TaskListComponentComponent {
     this.showDeleteAllModal = false;
     console.log('All Tasks Deleted...');
   }
+  
 }
