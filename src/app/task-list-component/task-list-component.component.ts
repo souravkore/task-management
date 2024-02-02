@@ -1,7 +1,9 @@
-import { Component, ElementRef, HostListener, Renderer2 } from '@angular/core';
-
+import { Component, HostListener } from '@angular/core';
 interface Task {
-  title: string;
+  title: any;
+  startDate?: string;
+  endDate?: string;
+  timeSpend?: number;
   isComplete: boolean;
 }
 @Component({
@@ -10,11 +12,6 @@ interface Task {
   styleUrls: ['./task-list-component.component.css']
 })
 export class TaskListComponentComponent {
-  constructor(private renderer: Renderer2, private el: ElementRef) {
-    // Add the page refresh confirmation
-    this.addPageRefreshConfirmation();
-  }
-
   tasks: Task[] = [
     { title: 'Task 1', isComplete: false },
     { title: 'Task 2', isComplete: false },
@@ -22,29 +19,45 @@ export class TaskListComponentComponent {
   ];
 
   showConfirmationModal = false;
-
+  showDeleteAllModal = false;
   taskToDelete: Task | null = null;
+  date: Date = new Date();
 
-  date:Date = new Date(); 
+  ngOnInit() {
+    this.loadTasksFromLocalStorage();
+  }
+
+  ngOnChanges() {
+    this.loadTasksFromLocalStorage();
+  }
+
+  loadTasksFromLocalStorage() {
+    const storedTasks = localStorage.getItem('userTasks');
+    this.tasks = storedTasks ? JSON.parse(storedTasks) : [];
+
+    // Ensure that each task has default values for startDate, endDate, and timeSpend
+    this.tasks.forEach(task => {
+      task.startDate = task.startDate || '';
+      task.endDate = task.endDate || '';
+      task.timeSpend = task.timeSpend || 0;
+    });
+  }
+
+  saveTasksToLocalStorage() {
+    localStorage.setItem('userTasks', JSON.stringify(this.tasks));
+  }
 
   editTask(task: Task) {
-    // Prompt the user for a new task name
+    // You can implement a proper form or dialog for editing, this is just a basic example
     const newTitle = prompt('Enter the new task name:', task.title);
 
     if (newTitle !== null) {
-      // Find the index of the task in the array
       const index = this.tasks.indexOf(task);
 
       if (index !== -1) {
-        // Create a copy of the task
-        const updatedTask = { ...task };
-
-        // Update the title of the copy with the user's input
-        updatedTask.title = newTitle;
-
-        // Replace the task in the array with the updated copy
+        const updatedTask = { ...task, title: newTitle };
         this.tasks[index] = updatedTask;
-
+        this.saveTasksToLocalStorage();
         console.log('Task edited:', updatedTask);
       }
     }
@@ -55,32 +68,45 @@ export class TaskListComponentComponent {
       const index = this.tasks.indexOf(this.taskToDelete);
       if (index !== -1) {
         this.tasks.splice(index, 1);
-        console.log('Task Deleted...')
+        this.saveTasksToLocalStorage();
+        console.log('Task Deleted...');
       }
-      this.cancelDeleteTask(); // Reset the modal and taskToDelete
+      this.cancelDeleteTask();
     }
   }
 
   addNewTask() {
-    // Prompt the user for a new task name
-    const newTitle = prompt('Add New Task:');
+    let title = prompt('Enter the new task name');
 
-    if (newTitle !== null) {
-      // Create a new task with the user's input
-      const newTask: Task = { title: newTitle, isComplete: false };
-
-      // Add the new task to the tasks array
+    if (title !== null && title.trim() !== '') {
+      const newTask: Task = {
+        title: title,
+        isComplete: false,
+        startDate: '',
+        endDate: '',
+        timeSpend: 0
+      };
       this.tasks.push(newTask);
-
+      this.saveTasksToLocalStorage();
       console.log('New Task Added:', newTask);
     }
   }
 
-  IsCompleted(task: Task) {
-    task.isComplete = !task.isComplete;
+  onTaskCompletionChange(task: Task) {
+    this.saveTasksToLocalStorage();
+    console.log('Task Completion Changed:', task);
   }
-  toggleCompletion(task: Task) {
-    task.isComplete = !task.isComplete;
+  onTimeSpendChange(task: Task) {
+    this.saveTasksToLocalStorage();
+    console.log('Time Spend Changed:', task);
+  }
+  onEndDateChange(task: Task) {
+    this.saveTasksToLocalStorage();
+    console.log('End Date Changed:', task);
+  }
+  onStartDateChange(task: Task) {
+    this.saveTasksToLocalStorage();
+    console.log('Start Date Changed:', task);
   }
 
   confirmDeleteTask(task: Task) {
@@ -93,18 +119,25 @@ export class TaskListComponentComponent {
     this.showConfirmationModal = false;
   }
 
-  // Function to add page refresh confirmation
-  addPageRefreshConfirmation() {
-    window.addEventListener('beforeunload', (e) => {
-      e.preventDefault();
-      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-    });
-  }
-
-  // HostListener for beforeunload event (when browser refresh button is clicked)
   @HostListener('window:beforeunload', ['$event'])
-  onBeforeUnload(event: Event): void {
+  onBeforeUnload(event: Event): string {
+    const unsavedChangesMessage = 'You have unsaved changes. Are you sure you want to leave?';
     event.preventDefault();
+    return unsavedChangesMessage;
   }
 
+  deleteAllData() {
+    this.showDeleteAllModal = true;
+  }
+
+  cancelOperationTask() {
+    this.showDeleteAllModal = false;
+  }
+
+  deleteOperation() {
+    localStorage.clear();
+    this.tasks = []; // Clear the tasks array
+    this.showDeleteAllModal = false;
+    console.log('All Tasks Deleted...');
+  }
 }
