@@ -1,1 +1,21 @@
- 
+.completed-tasks-container {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.completed-tasks-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.completed-tasks-list li {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.completed-task-title {
+    color: #555; /* Adjust the color for better visibility */
+    font-weight: bold; /* Make the completed tasks more prominent */
+}

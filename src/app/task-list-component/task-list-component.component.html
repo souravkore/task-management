@@ -1,10 +1,48 @@
-<div class="col-md-4">
-    <button (click)="deleteAllData()" class="btn btn-danger">Delete your all data</button>
-</div>
 <div class="container">
-    <h2 class="text-center mt-4">Your Daily Task Manager</h2>
-    <p class="text-center">{{ date | date:'dd-MM-yyyy' }} {{ date | date:'EEEE' }}</p>
     <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center mt-4">Your Daily Task Manager</h2>
+            <p class="text-center">{{ date | date:'dd-MM-yyyy' }} {{ date | date:'EEEE' }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Task Form -->
+        <div class="col-md-4">
+            <form [formGroup]="taskForm" (ngSubmit)="addNewTask()">
+                <div class="form-group">
+                    <label for="title">Task Title:</label>
+                    <input type="text" class="form-control" id="title" formControlName="title" required>
+                    <div *ngIf="taskForm.get('title') ?.hasError('required')"
+                        class="text-danger">
+                        Title is required.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" class="form-control" id="startDate" formControlName="startDate" required>
+                    <div *ngIf="taskForm.get('startDate')?.hasError('required')" class="text-danger">
+                        Start Date is required.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" class="form-control" id="endDate" formControlName="endDate">
+                </div>
+                <div class="form-group">
+                    <label for="timeSpend">Time Spend:</label>
+                    <input type="number" class="form-control" id="timeSpend" formControlName="timeSpend">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="isComplete" formControlName="isComplete">
+                    <label class="form-check-label" for="isComplete">{{ taskForm.get('isComplete')?.value ? 'Completed'
+                        : 'Pending' }}</label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Add Task</button>
+            </form>
+        </div>
+
+        <!-- Task Cards -->
         <div class="col-md-4" *ngFor="let task of tasks">
             <div class="card mb-3">
                 <div class="card-body">
@@ -19,18 +57,15 @@
                     </div>
                     <div class="form-group">
                         <label for="dateInput1">Start Date:</label>
-                        <input type="date" class="form-control" id="dateInput1" [(ngModel)]="task.startDate"
-                            (change)="onStartDateChange(task)" />
+                        <input type="date" class="form-control" id="dateInput1" [(ngModel)]="task.startDate" />
                     </div>
                     <div class="form-group">
                         <label for="dateInput2">End Date:</label>
-                        <input type="date" class="form-control" id="dateInput2" [(ngModel)]="task.endDate"
-                            (change)="onEndDateChange(task)" />
+                        <input type="date" class="form-control" id="dateInput2" [(ngModel)]="task.endDate" />
                     </div>
                     <div class="form-group">
                         <label for="dateInput2">Time Spend: (hr)</label>
-                        <input type="number" class="form-control" id="timeSpend" [(ngModel)]="task.timeSpend"
-                            (change)="onTimeSpendChange(task)" />
+                        <input type="number" class="form-control" id="timeSpend" [(ngModel)]="task.timeSpend" />
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="checkboxInput" [(ngModel)]="task.isComplete"
@@ -41,10 +76,43 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
-            <button (click)="addNewTask()" class="btn btn-primary add-button">Add New Task</button>
+            <div class="completed-tasks-container">
+                <h4>Completed Tasks</h4>
+                <ul class="list-group completed-tasks-list">
+                    <li *ngFor="let completedTask of completedTasks" class="list-group-item">
+                        <div class="completed-task-details">
+                            <div class="completed-task-info">
+                                <strong> Title:</strong> {{ completedTask.title }}
+                            </div>
+                            <div class="completed-task-info">
+                                <strong> Start Date:</strong> {{ completedTask.startDate | date:'shortDate' }}
+                            </div>
+                            <div class="completed-task-info">
+                                <strong> End Date:</strong> {{ completedTask.endDate | date:'shortDate' }}
+                            </div>
+                            <div class="completed-task-info">
+                                <strong> Time Spend:</strong> {{ completedTask.timeSpend }} hours
+                            </div>
+                            <div class="completed-task-info">
+                                <strong> Completed:</strong> {{ completedTask.isComplete ? 'Yes' : 'No' }}
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
+
+    <div class="row mt-3">
+        <!-- Delete All Data Button -->
+        <div class="col-md-4">
+            <button (click)="deleteAllData()" class="btn btn-danger">Delete Your All Data</button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modals -->
     <div class="confirmation-modal" *ngIf="showConfirmationModal">
         <div class="modal-dialog">
             <div class="modal-content">

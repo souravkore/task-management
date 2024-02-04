@@ -1,4 +1,5 @@
 import { Component, HostListener } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 interface Task {
   title: any;
   startDate?: string;
@@ -12,11 +13,19 @@ interface Task {
   styleUrls: ['./task-list-component.component.css']
 })
 export class TaskListComponentComponent {
-  tasks: Task[] = [
-    { title: 'Task 1', isComplete: false },
-    { title: 'Task 2', isComplete: false },
-    { title: 'Task 3', isComplete: false }
-  ];
+  tasks: Task[] = [];
+  taskForm: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.taskForm = this.fb.group({
+      title: ['', Validators.required],
+      startDate: ['',Validators.required],
+      endDate: [''],
+      timeSpend: [0, Validators.min(0)],
+      isComplete: [false]
+    });
+  }
+  completedTasks: Task[] = [];
 
   showConfirmationModal = false;
   showDeleteAllModal = false;
@@ -27,15 +36,12 @@ export class TaskListComponentComponent {
     this.loadTasksFromLocalStorage();
   }
 
-  ngOnChanges() {
-    this.loadTasksFromLocalStorage();
-  }
-
   loadTasksFromLocalStorage() {
     const storedTasks = localStorage.getItem('userTasks');
     this.tasks = storedTasks ? JSON.parse(storedTasks) : [];
 
-    // Ensure that each task has default values for startDate, endDate, and timeSpend
+    const usercompletedTasks = localStorage.getItem('userCompletedTasks');
+    this.completedTasks = usercompletedTasks ? JSON.parse(usercompletedTasks) : [];
     this.tasks.forEach(task => {
       task.startDate = task.startDate || '';
       task.endDate = task.endDate || '';
@@ -45,10 +51,10 @@ export class TaskListComponentComponent {
 
   saveTasksToLocalStorage() {
     localStorage.setItem('userTasks', JSON.stringify(this.tasks));
+    localStorage.setItem('userCompletedTasks', JSON.stringify(this.completedTasks));
   }
 
   editTask(task: Task) {
-    // You can implement a proper form or dialog for editing, this is just a basic example
     const newTitle = prompt('Enter the new task name:', task.title);
 
     if (newTitle !== null) {
@@ -76,26 +82,51 @@ export class TaskListComponentComponent {
   }
 
   addNewTask() {
-    let title = prompt('Enter the new task name');
-
-    if (title !== null && title.trim() !== '') {
-      const newTask: Task = {
-        title: title,
-        isComplete: false,
-        startDate: '',
-        endDate: '',
-        timeSpend: 0
-      };
+  if (this.taskForm.valid) {
+    const newTask = this.taskForm.value;
+    if(newTask.isComplete){
+      this.completedTasks.push(newTask);
+    }
+    else{
       this.tasks.push(newTask);
+    }
+    this.saveTasksToLocalStorage();
+    console.log('New Task Added:', newTask);
+
+    // Reset the form after adding a new task
+    this.taskForm.reset({
+      timeSpend: 0,
+      isComplete: false
+    });
+  }
+}
+
+  onTaskCompletionChange(task: Task) {
+    if (task.isComplete) {
+      this.tasks = this.tasks.filter((t) => !this.areTasksEqual(t, task));
+      const completedTaskWithDetails: Task = {
+        title: task.title,
+        isComplete: task.isComplete,
+        startDate: task.startDate,
+        endDate: task.endDate,
+        timeSpend: task.timeSpend
+      };
+      this.completedTasks.push(completedTaskWithDetails);
+  
       this.saveTasksToLocalStorage();
-      console.log('New Task Added:', newTask);
+      console.log('Task Completion Changed:', task);
     }
   }
 
-  onTaskCompletionChange(task: Task) {
-    this.saveTasksToLocalStorage();
-    console.log('Task Completion Changed:', task);
+  areTasksEqual(task1: Task, task2: Task): boolean {
+    return (
+      task1.title === task2.title &&
+      task1.startDate === task2.startDate &&
+      task1.endDate === task2.endDate &&
+      task1.timeSpend === task2.timeSpend
+    );
   }
+
   onTimeSpendChange(task: Task) {
     this.saveTasksToLocalStorage();
     console.log('Time Spend Changed:', task);
@@ -136,7 +167,8 @@ export class TaskListComponentComponent {
 
   deleteOperation() {
     localStorage.clear();
-    this.tasks = []; // Clear the tasks array
+    this.tasks = [];
+    this.completedTasks = [];
     this.showDeleteAllModal = false;
     console.log('All Tasks Deleted...');
   }
